@@ -4,7 +4,9 @@
     "name": "System Superuser",
     "description": "Grants full access to every resource in the system. Bypasses all checks.",
     "scope": "global",
-    "permissions": ["*"],
+    "permissions": [
+      "*"
+    ],
     "conditions": []
   },
   {
@@ -12,7 +14,12 @@
     "name": "Company Manager",
     "description": "Can create and manage company entities and their settings.",
     "scope": "global",
-    "permissions": ["companies:manage", "companies:create", "companies:edit", "companies:delete"],
+    "permissions": [
+      "companies:manage",
+      "companies:create",
+      "companies:edit",
+      "companies:delete"
+    ],
     "conditions": []
   },
   {
@@ -20,7 +27,11 @@
     "name": "Group Manager",
     "description": "Can manage user groups and forum moderation.",
     "scope": "global",
-    "permissions": ["groups:manage", "groups:moderate", "users:invite"],
+    "permissions": [
+      "groups:manage",
+      "groups:moderate",
+      "users:invite"
+    ],
     "conditions": []
   },
   {
@@ -28,7 +39,11 @@
     "name": "Content Editor",
     "description": "Can create and edit blog content globally.",
     "scope": "global",
-    "permissions": ["blog:create", "blog:edit", "blog:publish"],
+    "permissions": [
+      "blog:create",
+      "blog:edit",
+      "blog:publish"
+    ],
     "conditions": []
   },
   {
@@ -36,7 +51,11 @@
     "name": "Standard Member",
     "description": "Basic access. Can read content and edit their OWN profile (ABAC).",
     "scope": "global",
-    "permissions": ["profile:edit", "blog:read", "shop:view"],
+    "permissions": [
+      "profile:edit",
+      "blog:read",
+      "shop:view"
+    ],
     "conditions": [
       {
         "attribute": "resource.userId",
@@ -50,7 +69,11 @@
     "name": "Shop Owner (ABAC Example)",
     "description": "Can manage shops, but ONLY if they are the listed owner of that shop.",
     "scope": "global",
-    "permissions": ["shop:manage", "shop:edit", "shop:orders"],
+    "permissions": [
+      "shop:manage",
+      "shop:edit",
+      "shop:orders"
+    ],
     "conditions": [
       {
         "attribute": "resource.ownerId",
@@ -58,5 +81,15 @@
         "value": "$user.id"
       }
     ]
+  },
+  {
+    "id": "uy3jrsil5",
+    "name": "Shop Manager",
+    "description": "Manager of a shop",
+    "scope": "global",
+    "permissions": [
+      "blog:create"
+    ],
+    "conditions": []
   }
 ]

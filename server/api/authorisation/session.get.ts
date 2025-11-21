@@ -11,12 +11,7 @@
  * ================================================================================
  *
  * @description:
- * The "Bridge" between Server Storage and Client Logic.
- *
- * 1. Identifies the user via the Authentication layer's cookie.
- * 2. Loads their Assignments (which roles do they have?).
- * 3. Resolves those Assignments into full Policy Objects.
- * 4. Returns the Policies to the client for local evaluation.
+ * TODO: Create description here
  *
  * ================================================================================
  *
@@ -27,68 +22,6 @@
  *
  * ================================================================================
  */
-
-/**
- * ================================================================================
- *
- * @project:    @monorepo/authorisation
- * @file:       ~/layers/authorisation/utils/permissions.ts
- * @version:    2.0.0
- * @createDate: 2025 Nov 21
- * @createTime: 14:15
- * @author:     Steve R Lewis
- *
- * ================================================================================
- *
- * @description:
- * Dictionary of System Roles and Actions.
- *
- * NOTE: The logic engine has moved to `policyEvaluator.ts`.
- * This file now serves only as a source of truth for string constants
- * to avoid "Magic Strings" in the codebase.
- *
- * ================================================================================
- */
-
-export const ROLES = {
-  SUPERUSER: 'superuser',
-  ADMIN: 'admin',
-  USER: 'user'
-} as const;
-
-export const ACTIONS = {
-  // System Level
-  MANAGE_SYSTEM: 'system:manage',
-
-  // User Management
-  MANAGE_USERS: 'users:manage',
-
-  // Content
-  CREATE_BLOG: 'blog:create',
-  EDIT_BLOG: 'blog:edit',
-
-  // Profile
-  EDIT_PROFILE: 'profile:edit',
-
-  // Commerce
-  MANAGE_SHOP: 'shop:manage'
-} as const;
-```
-
-### Final Integration Note
-To ensure the policies are ready when the app starts, go to your `app.vue` or main layout and add:
-
-```typescript
-// In app.vue
-const { loadPolicies } = useAuthorisation();
-await loadPolicies();
-
-
-
-
-
-
-
 
 import { defineEventHandler, getCookie, createError } from 'h3'
 import { FileSystemPolicyRepository } from '../../repositories/FileSystemPolicyRepository'
