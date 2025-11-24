@@ -26,6 +26,9 @@
  */
 
 export default defineNuxtConfig({
+  compatibilityDate: '2025-10-08',
+  devtools: {enabled: true},
+
   // Extends authentication because it needs access to the user state store
   extends: [
     '@monorepo/authentication'
