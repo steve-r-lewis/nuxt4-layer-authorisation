@@ -21,8 +21,6 @@
  * - Uses Service Locator `getPolicyRepository()`.
  * - Removed direct FileSystem import to fix build error.
  *
- *
- *
  * V1.0.0, 20251121-01:35
  * Initial creation and release of [id].ts
  *
@@ -41,7 +39,7 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
   if (!id) throw createError({ statusCode: 400, statusMessage: 'ID required' });
 
-  // Use the Service Locator
+  // Use Service Locator
   const repo = getPolicyRepository();
   const method = event.method;
 

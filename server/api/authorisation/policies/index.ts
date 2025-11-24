@@ -17,6 +17,10 @@
  *
  * @notes: Revision History
  *
+ * V1.1.0, 20251124-01:45
+ * - Uses Service Locator `getPolicyRepository()`.
+ * - Removed direct FileSystem import to fix build error.
+ *
  * V1.0.0, 20251121-01:33
  * Initial creation and release of index.ts
  *
@@ -24,24 +28,22 @@
  */
 
 import { defineEventHandler, readBody, createError, getCookie } from 'h3'
-import { FileSystemPolicyRepository } from '../../../repositories/FileSystemPolicyRepository'
 import type { PolicyRole } from '../../../../types/Policy'
 
-const repo = new FileSystemPolicyRepository();
+// Nitro Auto-Import: getPolicyRepository() from ~/server/utils/appContainer.ts
 
 export default defineEventHandler(async (event) => {
-  // Security Guard: Ensure user is logged in (and ideally is a Superuser)
+  // Security Guard
   const userEmail = getCookie(event, 'authentication-token-email');
   if (!userEmail) throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
 
+  // Use Service Locator
+  const repo = getPolicyRepository();
   const method = event.method;
 
   // --- GET: List All Policies ---
   if (method === 'GET') {
-    // For a management UI, we want to see everything.
-    // In a real app, you might filter by the user's scope (e.g. only show their company's roles).
     const globalPolicies = await repo.getPoliciesByScope('global');
-    // You might want to fetch all scopes here if building a superuser dashboard
     return globalPolicies;
   }
 
