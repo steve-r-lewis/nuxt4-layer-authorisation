@@ -3,7 +3,7 @@
 *
 * @project:    @monorepo/authorisation
 * @file:       ~/layers/authorisation/pages/account/Permissions.vue
-* @version:    1.0.0
+* @version:    1.1.4
 * @createDate: 2025 Nov 21
 * @createTime: 01:37
 * @author:     Steve R Lewis
@@ -17,6 +17,21 @@
 * ================================================================================
 *
 * @notes: Revision History
+*
+* V1.1.4, 20251125-00:59
+* - Optimized savePolicy to be non-blocking.
+*
+* V1.1.3, 20251125-00:44
+* - Non-blocking refresh to fix UI violation warnings.
+*
+* V1.1.2, 20251125-00:12
+* - Improved savePolicy async handling to prevent UI blocking.
+*
+* V1.1.1, 20251124-23:32
+* - Fixed 'click handler took too long' violation by optimizing refresh strategy.
+*
+* V1.1.0:
+* - Optimized savePolicy to reduce UI blocking.
 *
 * V1.0.0, 20251121-01:37
 * Initial creation and release of Permissions.vue
@@ -37,7 +52,6 @@
       </button>
     </header>
 
-    <!-- Policies Grid -->
     <div v-if="pending" class="text-center py-12">
       <Icon name="lucide:loader-circle" class="w-8 h-8 animate-spin text-pen-primary-default mx-auto" />
       <p class="mt-4 text-pen-muted-default">Loading policies...</p>
@@ -82,7 +96,7 @@
       </div>
     </div>
 
-    <!-- Editor Modal (Simple Implementation) -->
+    <!-- Editor Modal -->
     <div v-if="isEditorOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="bg-fill-base-default rounded-xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-auto flex flex-col">
         <div class="p-6 border-b border-edge-base-default flex justify-between items-center">
@@ -109,7 +123,6 @@
             <label class="block text-sm font-bold mb-1">Scope</label>
             <select v-model="form.scope" class="form-input w-full">
               <option value="global">Global (System Wide)</option>
-              <!-- You could dynamically add tenant scopes here -->
             </select>
           </div>
 
@@ -118,8 +131,6 @@
             <p class="text-xs text-pen-muted-default mb-2">Comma separated list (e.g. blog:create, shop:edit)</p>
             <input v-model="permissionsInput" type="text" class="form-input w-full" placeholder="blog:create, blog:edit" />
           </div>
-
-          <!-- ABAC Conditions could go here in a more advanced UI -->
 
           <div class="pt-4 flex justify-between items-center border-t border-edge-base-default mt-4">
             <button
@@ -130,21 +141,21 @@
             >
               Delete Role
             </button>
-            <div v-else></div> <!-- Spacer -->
+            <div v-else></div>
 
             <div class="flex gap-3">
               <button type="button" @click="isEditorOpen = false" class="btn bg-fill-tertiary-default text-pen-base-default">
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary">
-                Save Role
+              <button type="submit" class="btn btn-primary" :disabled="isSaving">
+                <Icon v-if="isSaving" name="lucide:loader-circle" class="w-4 h-4 animate-spin mr-2" />
+                <span>{{ isSaving ? 'Saving...' : 'Save Role' }}</span>
               </button>
             </div>
           </div>
         </form>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -156,12 +167,11 @@ definePageMeta({
   middleware: 'authentication'
 });
 
-// --- Data Fetching ---
 const { data: policies, pending, refresh } = await useFetch<PolicyRole[]>('/api/authorisation/policies');
 
-// --- Editor State ---
 const isEditorOpen = ref(false);
 const editingId = ref<string | null>(null);
+const isSaving = ref(false);
 
 const form = reactive({
   name: '',
@@ -171,10 +181,7 @@ const form = reactive({
   conditions: []
 });
 
-// Helper for the permission input string
 const permissionsInput = ref('');
-
-// --- Actions ---
 
 function openEditor(policy?: PolicyRole) {
   if (policy) {
@@ -194,47 +201,39 @@ function openEditor(policy?: PolicyRole) {
 }
 
 async function savePolicy() {
-  // Convert string input back to array
   const perms = permissionsInput.value.split(',').map(p => p.trim()).filter(p => p);
-
-  const payload = {
-    ...form,
-    permissions: perms
-  };
+  const payload = { ...form, permissions: perms };
+  isSaving.value = true;
 
   try {
     if (editingId.value) {
-      // Update
-      await $fetch(`/api/authorisation/policies/${editingId.value}`, {
-        method: 'PUT',
-        body: payload
-      });
+      await $fetch(`/api/authorisation/policies/${editingId.value}`, { method: 'PUT', body: payload });
     } else {
-      // Create
-      await $fetch('/api/authorisation/policies', {
-        method: 'POST',
-        body: payload
-      });
+      await $fetch('/api/authorisation/policies', { method: 'POST', body: payload });
     }
+    // Close immediately
     isEditorOpen.value = false;
-    refresh(); // Reload list
+    // Background refresh (non-blocking)
+    refresh();
   } catch (e) {
     alert('Failed to save policy');
-    console.error(e);
+    isEditorOpen.value = true;
+  } finally {
+    isSaving.value = false;
   }
 }
 
 async function deletePolicy() {
   if (!confirm('Are you sure you want to delete this role?')) return;
-
+  isSaving.value = true;
   try {
-    await $fetch(`/api/authorisation/policies/${editingId.value}`, {
-      method: 'DELETE'
-    });
+    await $fetch(`/api/authorisation/policies/${editingId.value}`, { method: 'DELETE' });
     isEditorOpen.value = false;
     refresh();
   } catch (e) {
     alert('Failed to delete policy');
+  } finally {
+    isSaving.value = false;
   }
 }
 </script>

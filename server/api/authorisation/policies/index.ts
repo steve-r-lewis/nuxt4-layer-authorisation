@@ -3,7 +3,7 @@
  *
  * @project:    @monorepo/authorisation
  * @file:       ~/layers/authorisation/server/api/authorisation/policies/index.ts
- * @version:    1.0.0
+ * @version:    1.3.0
  * @createDate: 2025 Nov 21
  * @createTime: 01:33
  * @author:     Steve R Lewis
@@ -16,6 +16,9 @@
  * ================================================================================
  *
  * @notes: Revision History
+ *
+ * V1.3.0, 20251124-20:59
+ * - Fixed import error by using Service Locator `getPolicyRepository()`.
  *
  * V1.1.0, 20251124-01:45
  * - Uses Service Locator `getPolicyRepository()`.
